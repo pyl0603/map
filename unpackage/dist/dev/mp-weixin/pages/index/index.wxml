@@ -1,0 +1,1 @@
+<view class="content"><map style="width:750rpx;height:100vh;" id="map" latitude="{{latitude}}" longitude="{{longitude}}" scale="17" show-location="true" show-compass="{{true}}" enable-poi="true" markers="{{markers}}" data-event-opts="{{[['bindtap',[['map',['$event']]]]]}}" bindbindtap="__e"></map></view>
