@@ -209,6 +209,8 @@ var _default =
       MarkersId: [],
       includePoints: [],
       locationVision: [],
+      AddressLocation: [],
+      key: 'SSDBZ-TGICF-Q6GJ3-NSZED-3Q4RV-N7BWS',
       // polyline:{
       // 	points:[],
       // 	color:'#0000AA',
@@ -266,7 +268,7 @@ var _default =
 
 
                   uni.request({ //搜索
-                    url: "https://apis.map.qq.com/ws/place/v1/search?keyword=".concat(_this.KeyWord, "&boundary=nearby(").concat(_this.latitude, ",").concat(_this.longitude, ",1000,1)&orderby=_distance&key=SSDBZ-TGICF-Q6GJ3-NSZED-3Q4RV-N7BWS")
+                    url: "https://apis.map.qq.com/ws/place/v1/search?keyword=".concat(_this.KeyWord, "&boundary=nearby(").concat(_this.latitude, ",").concat(_this.longitude, ",1000,0)&orderby=_distance&key=").concat(_this.key)
                     // https://apis.map.qq.com/ws/place/v1/search?keyword=酒店&boundary=nearby(24.47951,118.08948,1000,1)&orderby=_distance&key=SSDBZ-TGICF-Q6GJ3-NSZED-3Q4RV-N7BWS
                     // &page_size=20
                   }));case 7:res = _context.sent;
@@ -291,6 +293,8 @@ var _default =
                     iconPath: '../../static/图钉.png',
                     latitude: item.location.lat,
                     longitude: item.location.lng,
+                    clusterId: Number(item.id),
+                    joinCluster: true,
                     callout: {
                       content: item.title,
                       color: '#444444',
@@ -305,9 +309,10 @@ var _default =
                       content: index + 1,
                       color: '#FFFFFF',
                       fontSize: 12,
-
                       anchorX: '-8rpx',
-                      anchorY: '-58rpx' } };
+                      anchorY: '-58rpx',
+                      joinCluster: true } };
+
 
                   //ALWAYS
 
@@ -356,7 +361,8 @@ var _default =
 
     getPosition: function getPosition() {var _this2 = this;return _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee2() {var res, _res$, latitude, longitude;return _regenerator.default.wrap(function _callee2$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:_context2.next = 2;return (
                   uni.getLocation({
-                    type: 'gcj02' }));case 2:res = _context2.sent;_res$ =
+                    type: 'gcj02',
+                    geocode: true }));case 2:res = _context2.sent;_res$ =
 
 
 
@@ -367,10 +373,7 @@ var _default =
 
                 _this2.circle[0].latitude = latitude;
                 _this2.circle[0].longitude = longitude;
-                console.log(res, '-----------------------------------------------------');
-                console.log(res[1]);
-                console.log(_this2.circle);
-                console.log(_this2.searchMarkers);case 12:case "end":return _context2.stop();}}}, _callee2);}))();
+                console.log(res[1], '-----------------------------------------------------');case 9:case "end":return _context2.stop();}}}, _callee2);}))();
     },
     map: function map(e) {
       console.log(e);
@@ -398,8 +401,33 @@ var _default =
     callouttap: function callouttap(e) {//点击气泡触发的函数
       console.log('触发了气泡', e);
     },
-    markersTap: function markersTap(e) {var _this3 = this;return _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee3() {var res, callout, latitude, longitude, polyline, coors, i, data;return _regenerator.default.wrap(function _callee3$(_context3) {while (1) {switch (_context3.prev = _context3.next) {case 0:
+    markersTap: function markersTap(e) {var _this3 = this;return _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee3() {var Address, result, address, formatted_addresses, resOne, res, callout, latitude, longitude, polyline, coors, i, data;return _regenerator.default.wrap(function _callee3$(_context3) {while (1) {switch (_context3.prev = _context3.next) {case 0:_context3.next = 2;return (
+                  uni.request({
+                    url: "https://apis.map.qq.com/ws/geocoder/v1/?location=".concat(_this3.latitude, ",").concat(_this3.longitude, "&get_poi=0&key=").concat(_this3.key) }));case 2:Address = _context3.sent;
+
+
+                result =
+                Address[1].data.result;
+
+                address =
+
+                result.address, formatted_addresses = result.formatted_addresses;
+                _this3.AddressLocation.push({
+                  address: address,
+                  recommend_Address: formatted_addresses.recommend });
+
+                resOne = _this3.searchPosition.find(function (item, index) {
+                  return item.id == e.detail.markerId;
+                });
+                _this3.AddressLocation.push({
+                  address: resOne.address,
+                  recommend_Address: resOne.title });
+
+
+                console.log(_this3.AddressLocation, 'this.AddressLocation');
+
                 _this3.polyline = [];
+                _this3.mapCtx = wx.createMapContext('map'); //获取map组件的实例
                 res = _this3.searchMarkers.find(function (item, index) {//获取当前点击的标记点
                   return item.id == e.detail.markerId;
                 });
@@ -407,21 +435,30 @@ var _default =
                 callout =
 
 
-                res.callout, latitude = res.latitude, longitude = res.longitude;_context3.next = 5;return (
+                res.callout, latitude = res.latitude, longitude = res.longitude;_context3.next = 15;return (
+
                   uni.request({
-                    url: "https://apis.map.qq.com/ws/direction/v1/driving/?from=".concat(_this3.latitude, ",").concat(_this3.longitude, "&to=").concat(latitude, ",").concat(longitude, "&output=json&callback=cb&key=SSDBZ-TGICF-Q6GJ3-NSZED-3Q4RV-N7BWS") }));case 5:polyline = _context3.sent;
+                    url: "https://apis.map.qq.com/ws/direction/v1/driving/?from=".concat(_this3.latitude, ",").concat(_this3.longitude, "&to=").concat(latitude, ",").concat(longitude, "&output=json&callback=cb&key=").concat(_this3.key) }));case 15:polyline = _context3.sent;
 
                 coors = polyline[1].data.result.routes[0].polyline;
                 for (i = 2; i < coors.length; i++) {
                   coors[i] = coors[i - 2] + coors[i] / 1000000;
                 }
                 console.log(polyline, '路线');
+                console.log(res, '地点');
                 data = {
                   points: [],
                   color: '#3469aa',
                   width: 4,
                   borderWidth: 2,
-                  borderColor: '#5375aa' };
+                  borderColor: '#5375aa',
+                  colorList: [
+                  '#DDDDDD', '#FFB7DD', '#FFCCCC', '#FFC8B4', '#FFDDAA', '#FFEE99', '#FFFFBB', '#EEFFBB',
+                  '#CCFF99',
+                  '#99FF99', '#BBFFEE', '#AAFFEE', '#99FFFF', '#CCEEFF', '#CCDDFF', '#CCCCFF', '#CCBBFF',
+                  '#D1BBFF',
+                  '#E8CCFF', '#F0BBFF', '#E38EFF', '#9955FF'] };
+
 
                 coors.map(function (item, index, arr) {
                   // index % 2 === 0 ? data.latitude = arr[index]data.longitude = arr[index+1]: '' ;
@@ -437,11 +474,47 @@ var _default =
                 });
                 _this3.polyline.push(data);
                 console.log(_this3.polyline);
+                _this3.mapCtx.addMarkers({
+                  clear: true,
+                  markers: [{
+                    id: 12345678,
+                    width: 35,
+                    height: 35,
+                    iconPath: '../../static/起.png',
+                    latitude: _this3.latitude,
+                    longitude: _this3.longitude,
+                    label: {
+                      content: '起',
+                      color: '#FFFFFF',
+                      fontSize: 14,
+                      anchorX: '-15rpx',
+                      anchorY: '-60rpx' } },
 
-                _this3.mapCtx = wx.createMapContext('map'); //获取map组件的实例
+
+                  {
+                    id: 123456789,
+                    // title: item.title, //有callout会忽略
+                    width: 35,
+                    height: 35,
+                    iconPath: '../../static/终.png',
+                    latitude: latitude,
+                    longitude: longitude,
+                    label: {
+                      content: '终',
+                      color: '#FFFFFF',
+                      fontSize: 14,
+
+                      anchorX: '-15rpx',
+                      anchorY: '-60rpx' } }] });
+
+
+
+
+
                 _this3.mapCtx.includePoints({
                   points: data.points,
-                  padding: [50, 50, 50, 50] });case 15:case "end":return _context3.stop();}}}, _callee3);}))();
+                  padding: [50, 50, 50, 50] });case 26:case "end":return _context3.stop();}}}, _callee3);}))();
+
 
     } } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
